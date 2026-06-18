@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
-import type { ConversionJob, User } from '@veritext-convert/shared'
+import type { ConversionJob, User } from '@veritext-render/shared'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const dataDir = path.resolve(__dirname, '../../data')

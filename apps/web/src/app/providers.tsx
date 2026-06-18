@@ -37,8 +37,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('vt-convert-token')
-    const storedUser = localStorage.getItem('vt-convert-user')
+    const storedToken = localStorage.getItem('vt-render-token')
+    const storedUser = localStorage.getItem('vt-render-user')
     if (storedToken && storedUser) {
       setToken(storedToken)
       setUser(JSON.parse(storedUser))
@@ -47,15 +47,15 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const login = (newToken: string, newUser: AuthUser) => {
-    localStorage.setItem('vt-convert-token', newToken)
-    localStorage.setItem('vt-convert-user', JSON.stringify(newUser))
+    localStorage.setItem('vt-render-token', newToken)
+    localStorage.setItem('vt-render-user', JSON.stringify(newUser))
     setToken(newToken)
     setUser(newUser)
   }
 
   const logout = () => {
-    localStorage.removeItem('vt-convert-token')
-    localStorage.removeItem('vt-convert-user')
+    localStorage.removeItem('vt-render-token')
+    localStorage.removeItem('vt-render-user')
     setToken(null)
     setUser(null)
   }

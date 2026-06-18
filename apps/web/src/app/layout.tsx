@@ -3,7 +3,7 @@ import './globals.css'
 import { Providers } from './providers'
 
 export const metadata: Metadata = {
-  title: 'Veritext Convert',
+  title: 'Veritext Render',
   description: 'Document conversion service',
 }
 

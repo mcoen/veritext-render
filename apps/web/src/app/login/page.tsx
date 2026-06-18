@@ -89,7 +89,7 @@ export default function LoginPage() {
           {/* Title */}
           <div className="mt-6 flex items-center gap-4">
             <span className="h-px flex-1 bg-sky-500/75" />
-            <h1 className="text-3xl font-medium tracking-tight text-slate-700">Veritext Convert</h1>
+            <h1 className="text-3xl font-medium tracking-tight text-slate-700">Veritext Render</h1>
             <span className="h-px flex-1 bg-sky-500/75" />
           </div>
 

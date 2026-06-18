@@ -1,5 +1,5 @@
 {
-  "name": "@veritext-convert/api",
+  "name": "@veritext-render/api",
   "version": "0.1.0",
   "type": "module",
   "scripts": {

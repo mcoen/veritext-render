@@ -5,7 +5,7 @@ import { useQuery } from '@apollo/client'
 import { MY_CONVERSION_JOBS } from '@/lib/graphql/queries'
 import { formatDistanceToNow } from 'date-fns'
 import { FileOutput, CheckCircle2, Clock, XCircle, Plus } from 'lucide-react'
-import type { ConversionJob } from '@veritext-convert/shared'
+import type { ConversionJob } from '@veritext-render/shared'
 
 function StatusPill({ status }: { status: string }) {
   const styles: Record<string, string> = {

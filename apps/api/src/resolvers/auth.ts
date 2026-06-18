@@ -5,7 +5,7 @@ import { db } from '../db/index.js'
 import { GraphQLError } from 'graphql'
 import type { Context } from '../context.js'
 
-const JWT_SECRET = process.env.JWT_SECRET ?? 'veritext-convert-secret'
+const JWT_SECRET = process.env.JWT_SECRET ?? 'veritext-render-secret'
 
 function makeToken(user: { id: string; name: string; email: string }) {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()

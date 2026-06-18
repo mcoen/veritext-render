@@ -1,8 +1,8 @@
-# Veritext Convert — API Documentation
+# Veritext Render — API Documentation
 
 ## Overview
 
-Veritext Convert exposes a GraphQL API built with Apollo Server 4 and Express. All document conversion operations, authentication, and job management are handled through a single endpoint.
+Veritext Render exposes a GraphQL API built with Apollo Server 4 and Express. All document conversion operations, authentication, and job management are handled through a single endpoint.
 
 **Base URL:** `http://localhost:4000`
 **GraphQL endpoint:** `POST http://localhost:4000/graphql`

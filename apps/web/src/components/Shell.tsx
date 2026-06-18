@@ -120,7 +120,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                     className="text-3xl font-bold tracking-tight text-veritext-blue truncate dark:text-blue-300"
                     style={{ letterSpacing: '-0.02em' }}
                   >
-                    Veritext Convert
+                    Veritext Render
                   </h1>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                     Convert Word, Excel, and PowerPoint documents to PDF.

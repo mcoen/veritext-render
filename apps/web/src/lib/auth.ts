@@ -1,5 +1,5 @@
-export const TOKEN_KEY = 'vt-convert-token'
-export const USER_KEY = 'vt-convert-user'
+export const TOKEN_KEY = 'vt-render-token'
+export const USER_KEY = 'vt-render-user'
 
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null

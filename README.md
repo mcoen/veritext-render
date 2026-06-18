@@ -1,4 +1,4 @@
-# Veritext Convert
+# Veritext Render
 
 A full-stack document conversion service that converts Office documents (Word, Excel, PowerPoint, and more) to PDF. Built as a monorepo with a GraphQL API and a Next.js 15 web UI. Conversion is handled by [Gotenberg](https://gotenberg.dev) — a stateless Docker microservice wrapping LibreOffice — keeping the API server free of any native binary dependencies.
 
@@ -28,7 +28,7 @@ A full-stack document conversion service that converts Office documents (Word, E
 ### 1. Install dependencies
 
 ```bash
-cd /path/to/veritext-convert
+cd /path/to/veritext-render
 npm install
 ```
 
@@ -112,7 +112,7 @@ cd apps/web && npm run dev
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `4000` | Port for the API server |
-| `JWT_SECRET` | `veritext-convert-secret` | Secret for signing JWT tokens — **change in production** |
+| `JWT_SECRET` | `veritext-render-secret` | Secret for signing JWT tokens — **change in production** |
 | `GOTENBERG_URL` | `http://localhost:3000` | Gotenberg service URL |
 
 ### Web (`apps/web/.env.local`)
@@ -158,7 +158,7 @@ See [docs/API.md](docs/API.md) for full documentation with cURL examples and Typ
 ## Project Structure
 
 ```
-veritext-convert/
+veritext-render/
 ├── apps/
 │   ├── api/                        # GraphQL API
 │   │   └── src/

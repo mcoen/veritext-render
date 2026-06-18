@@ -5,7 +5,7 @@ export interface Context {
   user: { id: string; name: string; email: string } | null
 }
 
-const JWT_SECRET = process.env.JWT_SECRET ?? 'veritext-convert-secret'
+const JWT_SECRET = process.env.JWT_SECRET ?? 'veritext-render-secret'
 
 export async function createContext({ req }: { req: Request; res: Response }): Promise<Context> {
   const authHeader = req.headers.authorization

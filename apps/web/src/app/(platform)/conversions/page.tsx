@@ -6,7 +6,7 @@ import { MY_CONVERSION_JOBS, DELETE_JOB, CANCEL_JOB, REPROCESS_JOB } from '@/lib
 import { formatDistanceToNow, differenceInSeconds } from 'date-fns'
 import { Upload, Trash2, Download, FileOutput, Loader2, XCircle, RefreshCw } from 'lucide-react'
 import { getToken } from '@/lib/auth'
-import type { ConversionJob } from '@veritext-convert/shared'
+import type { ConversionJob } from '@veritext-render/shared'
 
 const SUPPORTED = ['.docx', '.xlsx', '.pptx', '.doc', '.xls', '.ppt', '.odt', '.ods', '.odp', '.rtf', '.csv', '.txt']
 
