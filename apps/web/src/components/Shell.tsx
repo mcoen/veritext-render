@@ -80,9 +80,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         {/* Sidebar */}
         <aside className="surface-panel hidden h-[calc(100dvh-2rem)] flex-col justify-between lg:flex min-h-0">
           <div className="flex flex-col space-y-2 min-h-0 flex-1">
-            <div className="px-3 pt-2 pb-1 shrink-0 flex items-center justify-center gap-2">
-              <FileOutput className="h-6 w-6 text-veritext-cyan" aria-hidden />
-              <span className="text-base font-bold text-veritext-blue tracking-tight">Veritext Convert</span>
+            <div className="px-3 pt-2 pb-1 shrink-0">
+              <img src="/Veritext_Logo_Color.png" alt="Veritext" className="mx-auto h-10 w-auto max-w-[180px]" />
             </div>
             <nav className="space-y-0.5 overflow-y-auto panel-scroll pr-1">
               <div className="px-3 pt-1 text-[10px] uppercase tracking-[0.18em] font-semibold text-slate-400 dark:text-slate-500">

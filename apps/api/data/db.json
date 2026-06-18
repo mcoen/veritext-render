@@ -28,6 +28,19 @@
       "startedAt": "2026-06-18T17:27:10.078Z",
       "completedAt": "2026-06-18T17:27:12.881Z",
       "downloadUrl": "http://localhost:4000/files/pdfs/461d4ebf-efd8-42ff-9b42-53a5bdc3b922.pdf"
+    },
+    {
+      "id": "8f9099c2-3262-4731-94f6-beb980dc8edf",
+      "userId": "user-1",
+      "userName": "Matt Coen",
+      "userEmail": "mcoen@veritext.com",
+      "fileName": "CPQFile.xlsx",
+      "fileType": ".xlsx",
+      "fileSizeBytes": 36532067,
+      "status": "COMPLETED",
+      "startedAt": "2026-06-18T17:45:51.037Z",
+      "completedAt": "2026-06-18T17:48:42.171Z",
+      "downloadUrl": "http://localhost:4000/files/pdfs/8f9099c2-3262-4731-94f6-beb980dc8edf.pdf"
     }
   ]
 }

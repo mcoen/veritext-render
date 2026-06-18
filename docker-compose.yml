@@ -7,5 +7,6 @@ services:
       - gotenberg
       - --libreoffice-restart-after=10
       - --libreoffice-max-queue-size=50
-      - --api-timeout=60s
+      - --api-timeout=300s
+      - --api-body-limit=100mb
     restart: unless-stopped

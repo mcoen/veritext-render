@@ -19,7 +19,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
 }))
 app.use(bodyParser.json())
-app.use('/graphql', graphqlUploadExpress({ maxFileSize: 50_000_000, maxFiles: 1 }))
+app.use('/graphql', graphqlUploadExpress({ maxFileSize: 100_000_000, maxFiles: 1 }))
 
 // Serve converted PDF files
 const uploadsDir = path.join(__dirname, '../uploads')

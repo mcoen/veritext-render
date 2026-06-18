@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../providers'
-import { LockKeyhole, LogIn, ChevronDown, ChevronUp, FileOutput } from 'lucide-react'
+import { LockKeyhole, LogIn, ChevronDown, ChevronUp } from 'lucide-react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/graphql'
 
@@ -16,8 +16,8 @@ const LOGIN_MUTATION = `
 `
 
 const QUICK_LOGINS = [
-  { email: 'mcoen@veritext.com', name: 'Matt Coen' },
-  { email: 'demo@veritext.com', name: 'Demo User' },
+  { email: 'mcoen@veritext.com', name: 'Matt Coen', role: 'Admin' },
+  { email: 'demo@veritext.com', name: 'Demo User', role: 'User' },
 ]
 
 export default function LoginPage() {
@@ -65,17 +65,24 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-slate-900">
-      {/* Background gradient matching veritext-resolve's feel */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#0d3f82_0%,_#082f61_40%,_#0a1424_100%)]" />
-
+    <main className="relative min-h-screen overflow-hidden">
+      <img
+        src="/VeritextBackground.webp"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
       <section className="relative mx-auto flex min-h-screen w-[94vw] max-w-6xl items-center justify-center py-8">
         <section className="w-full max-w-[560px] rounded-xl border border-slate-300/85 bg-white p-6 shadow-[0_16px_42px_-24px_rgba(0,30,90,0.5)]">
 
           {/* Logo circle */}
           <div className="flex justify-center">
             <div className="flex h-32 w-32 items-center justify-center rounded-full border-2 border-sky-400 bg-slate-100 shadow-[0_6px_24px_-14px_rgba(0,75,140,0.55)]">
-              <FileOutput className="h-14 w-14 text-veritext-blue" />
+              <img
+                src="https://www.michaelcoen.com/images/VeritextLogo.png"
+                alt="Veritext"
+                className="h-24 w-auto object-contain"
+              />
             </div>
           </div>
 
@@ -147,7 +154,7 @@ export default function LoginPage() {
               {showQuick ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
             {showQuick && (
-              <div className="mt-2 grid gap-2">
+              <div className="mt-2 grid gap-2 max-h-[42vh] overflow-auto pr-1 panel-scroll">
                 {QUICK_LOGINS.map(q => (
                   <button
                     key={q.email}
@@ -160,7 +167,7 @@ export default function LoginPage() {
                         <div className="font-semibold text-sm text-slate-950 truncate">{q.name}</div>
                         <div className="text-xs text-slate-500 truncate">{q.email}</div>
                       </div>
-                      <span className="status-pill shrink-0 border-blue-200 bg-blue-50 text-veritext-blue">User</span>
+                      <span className="status-pill shrink-0 border-blue-200 bg-blue-50 text-veritext-blue">{q.role}</span>
                     </div>
                   </button>
                 ))}

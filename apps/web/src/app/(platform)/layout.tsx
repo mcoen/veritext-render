@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../providers'
-import { Shell } from '@/components/Shell'
+import Shell from '@/components/Shell'
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
