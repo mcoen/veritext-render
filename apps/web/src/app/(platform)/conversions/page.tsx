@@ -8,7 +8,10 @@ import { Upload, Trash2, Download, FileOutput, Loader2, XCircle, RefreshCw } fro
 import { getToken } from '@/lib/auth'
 import type { ConversionJob } from '@veritext-render/shared'
 
-const SUPPORTED = ['.docx', '.xlsx', '.pptx', '.doc', '.xls', '.ppt', '.odt', '.ods', '.odp', '.rtf', '.csv', '.txt']
+const SUPPORTED = [
+  '.docx', '.xlsx', '.pptx', '.doc', '.xls', '.ppt', '.odt', '.ods', '.odp', '.rtf', '.csv', '.txt',
+  '.png', '.jpg', '.jpeg', '.tiff', '.tif', '.bmp', '.gif', '.svg', '.webp',
+]
 
 const CONVERT_MUTATION = `
   mutation ConvertDocument($file: Upload!, $fileName: String!) {
