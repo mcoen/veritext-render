@@ -1,0 +1,33 @@
+{
+  "users": [
+    {
+      "id": "user-1",
+      "name": "Matt Coen",
+      "email": "mcoen@veritext.com",
+      "passwordHash": "$2a$10$YILOOu0sJFX2TSlzGWOg5uZZTDqCzJNK2xm3tfI0PJStr4X/fhQFW",
+      "createdAt": "2026-06-18T16:56:31.598Z"
+    },
+    {
+      "id": "user-2",
+      "name": "Demo User",
+      "email": "demo@veritext.com",
+      "passwordHash": "$2a$10$vLyOHkSpjhEBWIRxfPFWeObzAwe8BMzNncz.yX.aKCv73lbDO54jy",
+      "createdAt": "2026-06-18T16:56:31.600Z"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "461d4ebf-efd8-42ff-9b42-53a5bdc3b922",
+      "userId": "user-1",
+      "userName": "Matt Coen",
+      "userEmail": "mcoen@veritext.com",
+      "fileName": "Sprint Plan OTC 2026 05 29.docx",
+      "fileType": ".docx",
+      "fileSizeBytes": 242602,
+      "status": "COMPLETED",
+      "startedAt": "2026-06-18T17:27:10.078Z",
+      "completedAt": "2026-06-18T17:27:12.881Z",
+      "downloadUrl": "http://localhost:4000/files/pdfs/461d4ebf-efd8-42ff-9b42-53a5bdc3b922.pdf"
+    }
+  ]
+}

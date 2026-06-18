@@ -67,7 +67,7 @@ export default function ConversionsPage() {
     try {
       const res = await fetch(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/graphql', {
         method: 'POST',
-        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { 'apollo-require-preflight': 'true', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body,
       })
       const json = await res.json()

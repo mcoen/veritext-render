@@ -1,77 +1,166 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { LayoutDashboard, FileOutput, LogOut } from 'lucide-react'
 import { useAuth } from '@/app/providers'
-import { FileOutput, LayoutDashboard, LogOut } from 'lucide-react'
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/conversions', label: 'Conversions', icon: FileOutput },
+const NAV = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, hoverClass: 'button-hover-blue' },
+  { href: '/conversions', label: 'Conversions', icon: FileOutput, hoverClass: 'button-hover-cyan' },
 ]
 
-export function Shell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
+function ProfileMenu({ user }: { user: { name: string; email: string } }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const { logout } = useAuth()
   const router = useRouter()
-  const { user, logout } = useAuth()
+  const pathname = usePathname()
 
-  function handleLogout() {
-    logout()
-    router.push('/login')
-  }
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false) }
+    const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onEsc)
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onEsc) }
+  }, [open])
+
+  const initials = user.name.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]?.toUpperCase() ?? '').join('') || '?'
+  const active = pathname.startsWith('/profile')
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
-      {/* Sidebar */}
-      <aside className="w-56 flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700">
-        {/* Logo */}
-        <div className="h-14 flex items-center gap-2 px-4 border-b border-slate-200 dark:border-slate-700">
-          <div className="h-7 w-7 rounded-lg bg-veritext-blue flex items-center justify-center">
-            <FileOutput className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-bold text-sm text-slate-900 dark:text-white tracking-tight">Veritext Convert</span>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + '/')
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`module-nav-button ${active ? 'bg-veritext-blue/10 text-veritext-blue font-semibold dark:bg-veritext-blue/20 dark:text-veritext-400' : ''}`}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                {label}
-              </Link>
-            )
-          })}
-        </nav>
-
-        {/* User */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-2 px-2 py-1.5 mb-1">
-            <div className="h-7 w-7 rounded-full bg-veritext-blue flex items-center justify-center text-white text-xs font-bold">
-              {user?.name?.charAt(0) ?? 'U'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{user?.name}</p>
-              <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+    <div className="relative z-60" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className={active || open ? 'icon-button-active overflow-hidden p-0' : 'icon-button overflow-hidden p-0'}
+        aria-label="Profile menu"
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        <span className="text-sm font-bold">{initials}</span>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-12 z-100 w-64 rounded-xl border border-slate-200 bg-white p-1.5 shadow-[0_14px_36px_-18px_rgba(15,23,42,0.5)]"
+        >
+          <div className="px-3 py-2 border-b border-slate-100">
+            <div className="text-sm font-semibold text-slate-950 truncate">{user.name}</div>
+            <div className="text-xs text-slate-500 truncate">{user.email}</div>
+            <div className="mt-1.5">
+              <span className="status-pill border-blue-200 bg-blue-50 text-veritext-blue">User</span>
             </div>
           </div>
-          <button onClick={handleLogout} className="module-nav-button text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-            <LogOut className="h-4 w-4" />
-            Sign out
+          <button
+            type="button"
+            role="menuitem"
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:bg-rose-50 hover:text-rose-700"
+            onClick={() => { setOpen(false); logout(); router.push('/login') }}
+          >
+            <LogOut className="h-4 w-4" aria-hidden="true" />
+            <span>Sign Out</span>
           </button>
         </div>
-      </aside>
+      )}
+    </div>
+  )
+}
 
-      {/* Main */}
-      <main className="flex-1 overflow-y-auto panel-scroll">
-        {children}
-      </main>
+export default function Shell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const { user } = useAuth()
+
+  return (
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
+      <div className="mx-auto grid min-h-screen w-[96vw] max-w-[1800px] gap-4 py-4 lg:grid-cols-[280px_1fr]">
+
+        {/* Sidebar */}
+        <aside className="surface-panel hidden h-[calc(100dvh-2rem)] flex-col justify-between lg:flex min-h-0">
+          <div className="flex flex-col space-y-2 min-h-0 flex-1">
+            <div className="px-3 pt-2 pb-1 shrink-0 flex items-center justify-center gap-2">
+              <FileOutput className="h-6 w-6 text-veritext-cyan" aria-hidden />
+              <span className="text-base font-bold text-veritext-blue tracking-tight">Veritext Convert</span>
+            </div>
+            <nav className="space-y-0.5 overflow-y-auto panel-scroll pr-1">
+              <div className="px-3 pt-1 text-[10px] uppercase tracking-[0.18em] font-semibold text-slate-400 dark:text-slate-500">
+                Navigation
+              </div>
+              {NAV.map(it => {
+                const active = pathname.startsWith(it.href)
+                const Icon = it.icon
+                return (
+                  <Link
+                    key={it.href}
+                    href={it.href}
+                    className={`module-nav-button-compact no-underline min-w-0 ${it.hoverClass} ${active ? 'active' : ''}`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                    <span className="truncate">{it.label}</span>
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center pt-3 border-t border-slate-200/70">
+            © Veritext Legal Solutions
+          </div>
+        </aside>
+
+        {/* Main */}
+        <main className="min-w-0 lg:h-[calc(100dvh-2rem)]">
+          <div className="flex h-full min-w-0 flex-col gap-4 overflow-hidden">
+
+            {/* Header */}
+            <header className="surface-panel-strong relative z-50 shrink-0">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <h1
+                    className="text-3xl font-bold tracking-tight text-veritext-blue truncate dark:text-blue-300"
+                    style={{ letterSpacing: '-0.02em' }}
+                  >
+                    Veritext Convert
+                  </h1>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    Convert Word, Excel, and PowerPoint documents to PDF.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {user && <ProfileMenu user={user} />}
+                </div>
+              </div>
+
+              {/* Mobile nav */}
+              <nav className="mt-3 grid grid-cols-2 gap-2 lg:hidden">
+                {NAV.map(it => {
+                  const Icon = it.icon
+                  const active = pathname.startsWith(it.href)
+                  return (
+                    <Link
+                      key={it.href}
+                      href={it.href}
+                      className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-semibold ${
+                        active ? 'border-veritext-cyan bg-blue-50 text-veritext-blue' : 'border-slate-300 bg-white text-slate-700'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" aria-hidden />
+                      <span>{it.label}</span>
+                    </Link>
+                  )
+                })}
+              </nav>
+            </header>
+
+            {/* Content */}
+            <div className="panel-scroll relative z-0 min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+              {children}
+            </div>
+          </div>
+        </main>
+
+      </div>
     </div>
   )
 }
