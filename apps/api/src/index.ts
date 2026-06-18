@@ -126,24 +126,26 @@ app.get('/', (_req, res) => {
     .op-item:last-child { border-bottom: none; }
     .op-trigger {
       width: 100%; background: none; border: none; cursor: pointer;
-      display: flex; align-items: center; gap: 0.75rem;
+      display: grid;
+      grid-template-columns: 220px 80px 110px 1fr 24px;
+      align-items: center; gap: 0.75rem;
       padding: 0.875rem 0; text-align: left;
     }
     .op-trigger:hover .op-name { color: #0c86c8; }
-    .op-name { font-family: monospace; font-weight: 600; color: #0d3f82; font-size: 0.9rem; flex: 1; }
+    .op-name { font-family: monospace; font-weight: 600; color: #0d3f82; font-size: 0.9rem; }
     .op-type {
-      display: inline-block; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
       font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-      padding: 0.15rem 0.4rem; border-radius: 0.25rem;
+      padding: 0.15rem 0.4rem; border-radius: 0.25rem; width: fit-content;
     }
     .op-type.query    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
     .op-type.mutation { background: #fdf4ff; color: #7e22ce; border: 1px solid #e9d5ff; }
-    .op-auth { font-size: 0.7rem; font-weight: 600; flex-shrink: 0; }
+    .op-auth { font-size: 0.7rem; font-weight: 600; }
     .auth-yes { color: #15803d; }
     .auth-no  { color: #94a3b8; }
-    .op-chevron { flex-shrink: 0; color: #94a3b8; transition: transform 0.2s; font-size: 0.75rem; }
+    .op-chevron { color: #94a3b8; transition: transform 0.2s; font-size: 0.75rem; justify-self: end; }
     .op-item.open .op-chevron { transform: rotate(180deg); }
-    .op-desc-short { font-size: 0.8rem; color: #64748b; flex: 2; }
+    .op-desc-short { font-size: 0.8rem; color: #64748b; }
 
     .op-detail {
       display: none; padding: 0 0 1.25rem 0;
