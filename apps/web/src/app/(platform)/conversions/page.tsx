@@ -2,9 +2,9 @@
 
 import { useCallback, useRef, useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client'
-import { MY_CONVERSION_JOBS, DELETE_JOB } from '@/lib/graphql/queries'
+import { MY_CONVERSION_JOBS, DELETE_JOB, CANCEL_JOB, REPROCESS_JOB } from '@/lib/graphql/queries'
 import { formatDistanceToNow, differenceInSeconds } from 'date-fns'
-import { Upload, Trash2, Download, FileOutput, Loader2 } from 'lucide-react'
+import { Upload, Trash2, Download, FileOutput, Loader2, XCircle, RefreshCw } from 'lucide-react'
 import { getToken } from '@/lib/auth'
 import type { ConversionJob } from '@veritext-convert/shared'
 
@@ -44,9 +44,9 @@ export default function ConversionsPage() {
     pollInterval: 3000,
   })
 
-  const [deleteJob] = useMutation(DELETE_JOB, {
-    onCompleted: () => refetch(),
-  })
+  const [deleteJob] = useMutation(DELETE_JOB, { onCompleted: () => refetch() })
+  const [cancelJob] = useMutation(CANCEL_JOB, { onCompleted: () => refetch() })
+  const [reprocessJob] = useMutation(REPROCESS_JOB, { onCompleted: () => refetch() })
 
   const jobs = data?.myConversionJobs ?? []
 
@@ -178,10 +178,28 @@ export default function ConversionsPage() {
                       <td className="px-4 py-3 text-slate-500 text-xs">{duration}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          {job.downloadUrl && job.status === 'COMPLETED' && (
+                          {job.status === 'COMPLETED' && job.downloadUrl && (
                             <a href={job.downloadUrl} target="_blank" rel="noopener noreferrer" className="icon-button text-veritext-blue" title="Download PDF">
                               <Download className="h-4 w-4" />
                             </a>
+                          )}
+                          {(job.status === 'PENDING' || job.status === 'PROCESSING') && (
+                            <button
+                              onClick={() => cancelJob({ variables: { id: job.id } })}
+                              className="icon-button text-slate-400 hover:text-amber-600 hover:bg-amber-50"
+                              title="Cancel"
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </button>
+                          )}
+                          {job.status === 'FAILED' && (
+                            <button
+                              onClick={() => reprocessJob({ variables: { id: job.id } })}
+                              className="icon-button text-slate-400 hover:text-veritext-blue hover:bg-blue-50"
+                              title="Reprocess"
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                            </button>
                           )}
                           <button
                             onClick={() => deleteJob({ variables: { id: job.id } })}

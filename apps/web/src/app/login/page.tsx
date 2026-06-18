@@ -16,7 +16,7 @@ const LOGIN_MUTATION = `
 `
 
 const QUICK_LOGINS = [
-  { email: 'mcoen@veritext.com', name: 'Matt Coen', role: 'Admin' },
+  { email: 'mcoen@veritext.com', name: 'Mike Coen', role: 'Admin' },
   { email: 'demo@veritext.com', name: 'Demo User', role: 'User' },
 ]
 

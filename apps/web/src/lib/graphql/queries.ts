@@ -78,3 +78,19 @@ export const DELETE_JOB = gql`
     deleteConversionJob(id: $id)
   }
 `
+
+export const CANCEL_JOB = gql`
+  mutation CancelConversionJob($id: ID!) {
+    cancelConversionJob(id: $id) {
+      id status completedAt error
+    }
+  }
+`
+
+export const REPROCESS_JOB = gql`
+  mutation ReprocessConversionJob($id: ID!) {
+    reprocessConversionJob(id: $id) {
+      id status startedAt
+    }
+  }
+`

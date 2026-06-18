@@ -142,5 +142,85 @@ export const jobResolvers = {
       await db.write()
       return true
     },
+
+    cancelConversionJob: async (_: unknown, { id }: { id: string }, ctx: Context) => {
+      if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
+      await db.read()
+      const idx = db.data.jobs.findIndex(j => j.id === id)
+      if (idx === -1) throw new GraphQLError('Job not found')
+      if (db.data.jobs[idx].userId !== ctx.user.id) throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } })
+      const job = db.data.jobs[idx]
+      if (job.status !== 'PENDING' && job.status !== 'PROCESSING') {
+        throw new GraphQLError('Only PENDING or PROCESSING jobs can be cancelled')
+      }
+      db.data.jobs[idx] = {
+        ...job,
+        status: 'FAILED',
+        completedAt: new Date().toISOString(),
+        error: 'Cancelled by user',
+      }
+      await db.write()
+      return db.data.jobs[idx]
+    },
+
+    reprocessConversionJob: async (_: unknown, { id }: { id: string }, ctx: Context) => {
+      if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
+      await db.read()
+      const idx = db.data.jobs.findIndex(j => j.id === id)
+      if (idx === -1) throw new GraphQLError('Job not found')
+      if (db.data.jobs[idx].userId !== ctx.user.id) throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } })
+      const job = db.data.jobs[idx]
+      if (job.status !== 'FAILED') throw new GraphQLError('Only FAILED jobs can be reprocessed')
+
+      const originalPath = path.join(uploadsBase, 'originals', `${job.id}${job.fileType}`)
+      const inputBuffer = await fs.readFile(originalPath).catch(() => {
+        throw new GraphQLError('Original file not found — please upload again')
+      })
+
+      db.data.jobs[idx] = {
+        ...job,
+        status: 'PENDING',
+        startedAt: new Date().toISOString(),
+        completedAt: undefined,
+        downloadUrl: undefined,
+        error: undefined,
+      }
+      await db.write()
+      const updatedJob = db.data.jobs[idx]
+
+      // Re-run async conversion
+      const jobId = job.id
+      const originalFileName = job.fileName
+      ;(async () => {
+        try {
+          await db.read()
+          const i = db.data.jobs.findIndex(j => j.id === jobId)
+          if (i === -1) return
+          db.data.jobs[i] = { ...db.data.jobs[i], status: 'PROCESSING' }
+          await db.write()
+
+          const pdfBuffer = await convertToPdf(inputBuffer, originalFileName)
+          await ensureDir(path.join(uploadsBase, 'pdfs'))
+          await fs.writeFile(path.join(uploadsBase, 'pdfs', `${jobId}.pdf`), pdfBuffer)
+
+          const downloadUrl = `http://localhost:4000/files/pdfs/${jobId}.pdf`
+          await db.read()
+          const i2 = db.data.jobs.findIndex(j => j.id === jobId)
+          if (i2 === -1) return
+          db.data.jobs[i2] = { ...db.data.jobs[i2], status: 'COMPLETED', completedAt: new Date().toISOString(), downloadUrl }
+          await db.write()
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err)
+          await db.read()
+          const i = db.data.jobs.findIndex(j => j.id === jobId)
+          if (i !== -1) {
+            db.data.jobs[i] = { ...db.data.jobs[i], status: 'FAILED', completedAt: new Date().toISOString(), error: msg }
+            await db.write()
+          }
+        }
+      })()
+
+      return updatedJob
+    },
   },
 }

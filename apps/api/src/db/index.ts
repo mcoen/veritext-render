@@ -21,7 +21,7 @@ if (db.data.users.length === 0) {
   const hash1 = await bcrypt.hash('demo1234', 10)
   const hash2 = await bcrypt.hash('demo1234', 10)
   db.data.users = [
-    { id: 'user-1', name: 'Matt Coen', email: 'mcoen@veritext.com', passwordHash: hash1, createdAt: new Date().toISOString() },
+    { id: 'user-1', name: 'Mike Coen', email: 'mcoen@veritext.com', passwordHash: hash1, createdAt: new Date().toISOString() },
     { id: 'user-2', name: 'Demo User', email: 'demo@veritext.com', passwordHash: hash2, createdAt: new Date().toISOString() },
   ]
   await db.write()

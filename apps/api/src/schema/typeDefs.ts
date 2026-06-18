@@ -52,5 +52,7 @@ export const typeDefs = gql`
     login(email: String!, password: String!): AuthToken!
     convertDocument(file: Upload!, fileName: String!): ConversionJob!
     deleteConversionJob(id: ID!): Boolean!
+    cancelConversionJob(id: ID!): ConversionJob!
+    reprocessConversionJob(id: ID!): ConversionJob!
   }
 `

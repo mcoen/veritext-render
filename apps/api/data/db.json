@@ -2,7 +2,7 @@
   "users": [
     {
       "id": "user-1",
-      "name": "Matt Coen",
+      "name": "Mike Coen",
       "email": "mcoen@veritext.com",
       "passwordHash": "$2a$10$YILOOu0sJFX2TSlzGWOg5uZZTDqCzJNK2xm3tfI0PJStr4X/fhQFW",
       "createdAt": "2026-06-18T16:56:31.598Z"
@@ -19,7 +19,7 @@
     {
       "id": "461d4ebf-efd8-42ff-9b42-53a5bdc3b922",
       "userId": "user-1",
-      "userName": "Matt Coen",
+      "userName": "Mike Coen",
       "userEmail": "mcoen@veritext.com",
       "fileName": "Sprint Plan OTC 2026 05 29.docx",
       "fileType": ".docx",
@@ -32,7 +32,7 @@
     {
       "id": "8f9099c2-3262-4731-94f6-beb980dc8edf",
       "userId": "user-1",
-      "userName": "Matt Coen",
+      "userName": "Mike Coen",
       "userEmail": "mcoen@veritext.com",
       "fileName": "CPQFile.xlsx",
       "fileType": ".xlsx",
