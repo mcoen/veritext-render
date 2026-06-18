@@ -707,10 +707,11 @@ curl -X POST http://localhost:4000/graphql \
   <div class="card">
     <h2>Supported Input Formats</h2>
     <div class="pill-list">
-      ${['.docx','.doc','.xlsx','.xls','.pptx','.ppt','.odt','.ods','.odp','.rtf','.csv','.txt'].map(f => `<span class="pill">${f}</span>`).join('')}
+      ${['.docx','.doc','.xlsx','.xls','.pptx','.ppt','.odt','.ods','.odp','.rtf','.csv','.txt','.png','.jpg','.jpeg','.tiff','.tif','.bmp','.gif','.svg','.webp'].map(f => `<span class="pill">${f}</span>`).join('')}
     </div>
     <p style="margin-top:0.75rem;font-size:0.8rem;color:#64748b;">
-      All formats are converted to <strong>PDF</strong> via <a href="https://gotenberg.dev" style="color:#0c86c8;">Gotenberg</a> (LibreOffice).
+      All formats are converted to <strong>PDF</strong> via <a href="https://gotenberg.dev" style="color:#0c86c8;">Gotenberg</a>.
+      Documents use the LibreOffice route; SVG and WebP use the Chromium route.
       Maximum file size: <strong>100 MB</strong>.
     </p>
   </div>
