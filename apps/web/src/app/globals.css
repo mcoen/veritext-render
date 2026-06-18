@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --color-veritext-50: #eff6ff;
+  --color-veritext-100: #dbeafe;
+  --color-veritext-200: #bfdbfe;
+  --color-veritext-300: #93c5fd;
+  --color-veritext-400: #60a5fa;
+  --color-veritext-500: #0c86c8;
+  --color-veritext-600: #0d3f82;
+  --color-veritext-700: #0a3168;
+  --color-veritext-800: #082f61;
+  --color-veritext-900: #102033;
+  --color-veritext-950: #0a1424;
+
+  --color-veritext-blue: #0d3f82;
+  --color-veritext-cyan: #0c86c8;
+  --color-veritext-navy: #082f61;
+  --color-veritext-ink: #102033;
+
+  --color-accent-400: #38bdf8;
+  --color-accent-500: #0c86c8;
+  --color-accent-600: #0369a1;
+
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+  html { font-family: var(--font-sans); }
+}
+
+@utility surface-panel {
+  @apply rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
+}
+
+@utility soft-input {
+  @apply rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-xs focus:border-veritext-cyan focus:ring-2 focus:ring-veritext-cyan/20 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100;
+}
+
+@utility input {
+  soft-input;
+  @apply w-full;
+}
+
+@utility label {
+  @apply block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1 dark:text-slate-400;
+}
+
+@utility action-button {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-veritext-blue hover:bg-veritext-blue/10 focus:outline-none focus:ring-2 focus:ring-veritext-cyan transition-colors;
+}
+
+@utility btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold bg-veritext-blue text-white hover:bg-veritext-navy focus:outline-none focus:ring-2 focus:ring-veritext-cyan transition-colors;
+}
+
+@utility btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-veritext-cyan transition-colors dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800;
+}
+
+@utility subtle-button {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-500/10 focus:outline-none transition-colors;
+}
+
+@utility icon-button {
+  @apply h-9 w-9 inline-flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 focus:outline-none transition-colors dark:hover:bg-slate-800;
+}
+
+@utility module-nav-button {
+  @apply h-10 w-full flex items-center gap-2 rounded-lg px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors dark:text-slate-400 dark:hover:bg-slate-800;
+}
+
+@utility status-pill {
+  @apply inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide;
+}
+
+@utility chip {
+  @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold capitalize;
+}
+
+@utility h1 {
+  @apply text-2xl font-bold tracking-tight text-slate-950 dark:text-slate-50;
+}
+
+@utility h2 {
+  @apply text-lg font-bold tracking-tight text-slate-950 dark:text-slate-50;
+}
+
+@utility muted {
+  @apply text-sm text-slate-500 dark:text-slate-400;
+}
+
+@utility panel-scroll {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: theme(colors.slate.300) transparent;
+}
+
+@utility card {
+  surface-panel;
+}
