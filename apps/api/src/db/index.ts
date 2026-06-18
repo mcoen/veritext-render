@@ -1,6 +1,14 @@
 import { JSONFilePreset } from 'lowdb/node'
 import bcrypt from 'bcryptjs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import fs from 'fs'
 import type { ConversionJob, User } from '@veritext-convert/shared'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const dataDir = path.resolve(__dirname, '../../data')
+const dbPath = path.join(dataDir, 'db.json')
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true })
 
 interface UserRecord extends User {
   passwordHash: string
@@ -13,7 +21,7 @@ interface DbSchema {
 
 const defaultData: DbSchema = { users: [], jobs: [] }
 
-export const db = await JSONFilePreset<DbSchema>('./data/db.json', defaultData)
+export const db = await JSONFilePreset<DbSchema>(dbPath, defaultData)
 
 // Seed demo users on first run
 await db.read()
