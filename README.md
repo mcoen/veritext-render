@@ -1,13 +1,13 @@
 # Veritext Convert
 
-A full-stack document conversion service that converts Office documents (Word, Excel, PowerPoint, and more) to PDF using LibreOffice. Built as a monorepo with a GraphQL API and a Next.js 15 web UI.
+A full-stack document conversion service that converts Office documents (Word, Excel, PowerPoint, and more) to PDF. Built as a monorepo with a GraphQL API and a Next.js 15 web UI. Conversion is handled by [Gotenberg](https://gotenberg.dev) — a stateless Docker microservice wrapping LibreOffice — keeping the API server free of any native binary dependencies.
 
 ---
 
 ## Features
 
 - **GraphQL API** — Apollo Server 4 with file upload support (multipart spec)
-- **Document conversion** — Converts `.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`, `.odt`, `.ods`, `.odp`, `.rtf`, `.csv`, `.txt` to PDF via LibreOffice
+- **Document conversion** — Converts `.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`, `.odt`, `.ods`, `.odp`, `.rtf`, `.csv`, `.txt` to PDF via Gotenberg (LibreOffice)
 - **JWT authentication** — Register/login with Bearer token auth, 7-day expiry
 - **Job tracking** — Async conversion pipeline with PENDING → PROCESSING → COMPLETED/FAILED status
 - **Next.js 15 UI** — Dashboard with stats, drag-and-drop upload, job table with download links
@@ -19,59 +19,44 @@ A full-stack document conversion service that converts Office documents (Word, E
 ## Prerequisites
 
 - **Node.js 20+** (ESM support required)
-- **LibreOffice** must be installed on the host machine for document conversion
-
-### Installing LibreOffice
-
-**macOS:**
-```bash
-brew install --cask libreoffice
-```
-
-**Ubuntu/Debian:**
-```bash
-sudo apt-get install -y libreoffice
-```
-
-**Verify:**
-```bash
-libreoffice --version
-```
+- **Docker** — Gotenberg runs as a sidecar container; no native binaries needed on the host
 
 ---
 
 ## Setup
 
-### 1. Install root dependencies
+### 1. Install dependencies
 
 ```bash
 cd /path/to/veritext-convert
 npm install
 ```
 
-### 2. Install app dependencies
+### 2. Configure the API
 
 ```bash
-cd apps/api && npm install
-cd ../web && npm install
-```
-
-Or from the root with workspaces:
-```bash
-npm install --workspaces
+cp apps/api/.env.example apps/api/.env
 ```
 
 ---
 
 ## Development
 
-Start both the API and web app in watch mode from the root:
+### Start Gotenberg (required for conversion)
+
+```bash
+docker compose up -d
+```
+
+This starts Gotenberg on `http://localhost:3000`. It restarts automatically and requires no further configuration.
+
+### Start the app
 
 ```bash
 npm run dev
 ```
 
-Or start individually:
+Or individually:
 
 ```bash
 # API only (http://localhost:4000/graphql)
@@ -106,8 +91,9 @@ cd apps/web && npm run dev
 │   └───────────────────────────────────────────┘ │
 │                      │                           │
 │   ┌───────────────────▼───────────────────────┐ │
-│   │         LibreOffice (conversion)           │ │
-│   │   Buffer in → PDF Buffer out               │ │
+│   │      Gotenberg HTTP API  :3000             │ │
+│   │   POST /forms/libreoffice/convert          │ │
+│   │   (Docker sidecar, stateless)              │ │
 │   └───────────────────────────────────────────┘ │
 │                      │                           │
 │   ┌───────────────────▼───────────────────────┐ │
@@ -127,6 +113,7 @@ cd apps/web && npm run dev
 |----------|---------|-------------|
 | `PORT` | `4000` | Port for the API server |
 | `JWT_SECRET` | `veritext-convert-secret` | Secret for signing JWT tokens — **change in production** |
+| `GOTENBERG_URL` | `http://localhost:3000` | Gotenberg service URL |
 
 ### Web (`apps/web/.env.local`)
 
@@ -197,6 +184,7 @@ veritext-convert/
 ├── packages/
 │   └── shared/src/index.ts         # Shared TypeScript types
 ├── docs/API.md
+├── docker-compose.yml              # Gotenberg sidecar
 ├── turbo.json
 └── package.json
 ```

@@ -98,7 +98,7 @@ export const jobResolvers = {
           db.data.jobs[idx] = { ...db.data.jobs[idx], status: 'PROCESSING' }
           await db.write()
 
-          const pdfBuffer = await convertToPdf(inputBuffer)
+          const pdfBuffer = await convertToPdf(inputBuffer, originalFileName)
 
           await ensureDir(path.join(uploadsBase, 'pdfs'))
           await fs.writeFile(path.join(uploadsBase, 'pdfs', `${jobId}.pdf`), pdfBuffer)
