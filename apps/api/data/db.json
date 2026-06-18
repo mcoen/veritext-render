@@ -54,6 +54,19 @@
       "startedAt": "2026-06-18T17:56:53.292Z",
       "completedAt": "2026-06-18T17:56:59.742Z",
       "downloadUrl": "http://localhost:4000/files/pdfs/a26116e5-8fdf-4580-b8c3-ede0fbe96b9a.pdf"
+    },
+    {
+      "id": "78e5eec3-6a85-4eb2-b952-8ce603560788",
+      "userId": "user-1",
+      "userName": "Mike Coen",
+      "userEmail": "mcoen@veritext.com",
+      "fileName": "30-60-90-DayPlan.pptx",
+      "fileType": ".pptx",
+      "fileSizeBytes": 4602256,
+      "status": "COMPLETED",
+      "startedAt": "2026-06-18T18:16:38.546Z",
+      "completedAt": "2026-06-18T18:16:45.141Z",
+      "downloadUrl": "http://localhost:4000/files/pdfs/78e5eec3-6a85-4eb2-b952-8ce603560788.pdf"
     }
   ]
 }

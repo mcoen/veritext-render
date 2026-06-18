@@ -38,7 +38,7 @@ app.get('/', (_req, res) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Veritext Convert API</title>
+  <title>Veritext Convert Service</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -233,7 +233,7 @@ app.get('/', (_req, res) => {
       </svg>
     </div>
     <div class="header-text">
-      <h1>Veritext Convert API</h1>
+      <h1>Veritext Convert Service</h1>
       <p>GraphQL microservice for document-to-PDF conversion</p>
       <span class="badge"><span class="badge-dot"></span>Operational</span>
     </div>
@@ -715,7 +715,7 @@ curl -X POST http://localhost:4000/graphql \
     </p>
   </div>
 
-  <div class="footer">© Veritext Legal Solutions &nbsp;·&nbsp; Veritext Convert API</div>
+  <div class="footer">© Veritext Legal Solutions &nbsp;·&nbsp; Veritext Convert Service</div>
 </div>
 <script>
   function toggle(btn) {
