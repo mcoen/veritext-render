@@ -121,29 +121,68 @@ app.get('/', (_req, res) => {
     .endpoint-path a:hover { text-decoration: underline; }
     .endpoint-desc { font-size: 0.8rem; color: #64748b; margin-top: 0.2rem; }
 
-    /* Op table */
-    .op-table { width: 100%; border-collapse: collapse; font-size: 0.825rem; }
-    .op-table th {
-      text-align: left; font-size: 0.7rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8;
-      padding: 0 0.75rem 0.5rem;
+    /* Op accordion */
+    .op-item { border-bottom: 1px solid #f1f5f9; }
+    .op-item:last-child { border-bottom: none; }
+    .op-trigger {
+      width: 100%; background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.875rem 0; text-align: left;
     }
-    .op-table th:first-child { padding-left: 0; }
-    .op-table td { padding: 0.5rem 0.75rem; border-top: 1px solid #f1f5f9; vertical-align: top; }
-    .op-table td:first-child { padding-left: 0; }
-    .op-table tr:first-child td { border-top: none; }
-    .op-name { font-family: monospace; font-weight: 600; color: #0d3f82; }
+    .op-trigger:hover .op-name { color: #0c86c8; }
+    .op-name { font-family: monospace; font-weight: 600; color: #0d3f82; font-size: 0.9rem; flex: 1; }
     .op-type {
-      display: inline-block;
+      display: inline-block; flex-shrink: 0;
       font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
       padding: 0.15rem 0.4rem; border-radius: 0.25rem;
     }
     .op-type.query    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
     .op-type.mutation { background: #fdf4ff; color: #7e22ce; border: 1px solid #e9d5ff; }
-    .op-auth { font-size: 0.75rem; }
+    .op-auth { font-size: 0.7rem; font-weight: 600; flex-shrink: 0; }
     .auth-yes { color: #15803d; }
     .auth-no  { color: #94a3b8; }
-    .op-desc  { color: #475569; }
+    .op-chevron { flex-shrink: 0; color: #94a3b8; transition: transform 0.2s; font-size: 0.75rem; }
+    .op-item.open .op-chevron { transform: rotate(180deg); }
+    .op-desc-short { font-size: 0.8rem; color: #64748b; flex: 2; }
+
+    .op-detail {
+      display: none; padding: 0 0 1.25rem 0;
+    }
+    .op-item.open .op-detail { display: block; }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } }
+    .detail-section h4 {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #94a3b8; margin-bottom: 0.5rem;
+    }
+    .arg-row { display: flex; gap: 0.5rem; align-items: baseline; font-size: 0.8rem; margin-bottom: 0.2rem; }
+    .arg-name { font-family: monospace; color: #0f172a; font-weight: 500; }
+    .arg-type { font-family: monospace; color: #0c86c8; }
+    .arg-note { color: #94a3b8; font-size: 0.73rem; }
+    .returns { font-family: monospace; font-size: 0.82rem; color: #7e22ce; }
+
+    .example-block { position: relative; }
+    .example-block h4 {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #94a3b8; margin-bottom: 0.5rem;
+    }
+    .example-block pre {
+      background: #0f172a; color: #e2e8f0; border-radius: 0.625rem;
+      padding: 1rem; font-size: 0.75rem; line-height: 1.6;
+      overflow-x: auto; font-family: monospace; white-space: pre;
+    }
+    .copy-btn {
+      position: absolute; top: 1.75rem; right: 0.5rem;
+      background: #1e293b; border: 1px solid #334155; color: #94a3b8;
+      border-radius: 0.375rem; padding: 0.2rem 0.5rem;
+      font-size: 0.7rem; cursor: pointer; font-family: monospace;
+    }
+    .copy-btn:hover { background: #334155; color: #e2e8f0; }
+    .kw  { color: #c084fc; }
+    .fn  { color: #67e8f9; }
+    .str { color: #86efac; }
+    .cm  { color: #475569; }
 
     /* Types */
     .type-block { margin-bottom: 1.25rem; }
@@ -243,29 +282,393 @@ app.get('/', (_req, res) => {
 
   <!-- Operations -->
   <div class="card">
-    <h2>Operations</h2>
-    <table class="op-table">
-      <thead>
-        <tr>
-          <th>Operation</th>
-          <th>Type</th>
-          <th>Auth</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td class="op-name">login</td><td><span class="op-type mutation">Mutation</span></td><td class="op-auth auth-no">No</td><td class="op-desc">Authenticate with email + password, returns JWT token</td></tr>
-        <tr><td class="op-name">register</td><td><span class="op-type mutation">Mutation</span></td><td class="op-auth auth-no">No</td><td class="op-desc">Create a new account, returns JWT token</td></tr>
-        <tr><td class="op-name">me</td><td><span class="op-type query">Query</span></td><td class="op-auth auth-yes">Yes</td><td class="op-desc">Return the current authenticated user</td></tr>
-        <tr><td class="op-name">convertDocument</td><td><span class="op-type mutation">Mutation</span></td><td class="op-auth auth-yes">Yes</td><td class="op-desc">Upload a file and start async PDF conversion; returns job immediately with PENDING status</td></tr>
-        <tr><td class="op-name">myConversionJobs</td><td><span class="op-type query">Query</span></td><td class="op-auth auth-yes">Yes</td><td class="op-desc">List all conversion jobs belonging to the current user</td></tr>
-        <tr><td class="op-name">allConversionJobs</td><td><span class="op-type query">Query</span></td><td class="op-auth auth-yes">Yes</td><td class="op-desc">List all conversion jobs across all users</td></tr>
-        <tr><td class="op-name">conversionJob</td><td><span class="op-type query">Query</span></td><td class="op-auth auth-yes">Yes</td><td class="op-desc">Fetch a single conversion job by ID</td></tr>
-        <tr><td class="op-name">cancelConversionJob</td><td><span class="op-type mutation">Mutation</span></td><td class="op-auth auth-yes">Yes</td><td class="op-desc">Cancel a PENDING or PROCESSING job</td></tr>
-        <tr><td class="op-name">reprocessConversionJob</td><td><span class="op-type mutation">Mutation</span></td><td class="op-auth auth-yes">Yes</td><td class="op-desc">Retry a FAILED job using the original uploaded file</td></tr>
-        <tr><td class="op-name">deleteConversionJob</td><td><span class="op-type mutation">Mutation</span></td><td class="op-auth auth-yes">Yes</td><td class="op-desc">Permanently remove a job record</td></tr>
-      </tbody>
-    </table>
+    <h2>Operations — click any row to expand</h2>
+    <div id="ops">
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">login</span>
+          <span class="op-type mutation">Mutation</span>
+          <span class="op-auth auth-no">No auth</span>
+          <span class="op-desc-short">Authenticate and receive a JWT token</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div class="arg-row"><span class="arg-name">email</span><span class="arg-type">String!</span></div>
+              <div class="arg-row"><span class="arg-name">password</span><span class="arg-type">String!</span></div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">AuthToken!</div>
+              <div class="arg-row" style="margin-top:0.4rem"><span class="arg-name">token</span><span class="arg-type">String!</span><span class="arg-note">JWT, 7-day expiry</span></div>
+              <div class="arg-row"><span class="arg-name">userId</span><span class="arg-type">String!</span></div>
+              <div class="arg-row"><span class="arg-name">userName</span><span class="arg-type">String!</span></div>
+              <div class="arg-row"><span class="arg-name">userEmail</span><span class="arg-type">String!</span></div>
+              <div class="arg-row"><span class="arg-name">expiresAt</span><span class="arg-type">String!</span></div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="cm"># POST http://localhost:4000/graphql</span>
+<span class="cm"># Content-Type: application/json</span>
+
+<span class="kw">mutation</span> <span class="fn">Login</span> {
+  login(
+    email: <span class="str">"mcoen@veritext.com"</span>
+    password: <span class="str">"demo1234"</span>
+  ) {
+    token
+    userId
+    userName
+    expiresAt
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">register</span>
+          <span class="op-type mutation">Mutation</span>
+          <span class="op-auth auth-no">No auth</span>
+          <span class="op-desc-short">Create a new account and receive a JWT token</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div class="arg-row"><span class="arg-name">name</span><span class="arg-type">String!</span></div>
+              <div class="arg-row"><span class="arg-name">email</span><span class="arg-type">String!</span></div>
+              <div class="arg-row"><span class="arg-name">password</span><span class="arg-type">String!</span></div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">AuthToken!</div>
+              <div style="margin-top:0.4rem;font-size:0.8rem;color:#64748b">Same shape as <code>login</code></div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="kw">mutation</span> <span class="fn">Register</span> {
+  register(
+    name: <span class="str">"Jane Smith"</span>
+    email: <span class="str">"jane@example.com"</span>
+    password: <span class="str">"mypassword"</span>
+  ) {
+    token
+    userId
+    expiresAt
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">me</span>
+          <span class="op-type query">Query</span>
+          <span class="op-auth auth-yes">Auth required</span>
+          <span class="op-desc-short">Return the currently authenticated user</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div style="font-size:0.8rem;color:#94a3b8">None</div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">User</div>
+              <div class="arg-row" style="margin-top:0.4rem"><span class="arg-name">id</span><span class="arg-type">ID!</span></div>
+              <div class="arg-row"><span class="arg-name">name</span><span class="arg-type">String!</span></div>
+              <div class="arg-row"><span class="arg-name">email</span><span class="arg-type">String!</span></div>
+              <div class="arg-row"><span class="arg-name">createdAt</span><span class="arg-type">String!</span></div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="cm"># Authorization: Bearer &lt;token&gt;</span>
+
+<span class="kw">query</span> <span class="fn">Me</span> {
+  me {
+    id
+    name
+    email
+    createdAt
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">convertDocument</span>
+          <span class="op-type mutation">Mutation</span>
+          <span class="op-auth auth-yes">Auth required</span>
+          <span class="op-desc-short">Upload a file and start async PDF conversion</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div class="arg-row"><span class="arg-name">file</span><span class="arg-type">Upload!</span><span class="arg-note">multipart stream</span></div>
+              <div class="arg-row"><span class="arg-name">fileName</span><span class="arg-type">String!</span><span class="arg-note">original filename with extension</span></div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">ConversionJob!</div>
+              <div style="margin-top:0.4rem;font-size:0.8rem;color:#64748b">
+                Job is returned immediately with <code>status: PENDING</code>.<br/>
+                Poll <code>conversionJob(id)</code> or <code>myConversionJobs</code> for updates.
+              </div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example (multipart — graphql-multipart-request-spec)</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="cm"># curl example</span>
+curl -X POST http://localhost:4000/graphql \
+  -H <span class="str">"Authorization: Bearer &lt;token&gt;"</span> \
+  -H <span class="str">"apollo-require-preflight: true"</span> \
+  -F <span class="str">'operations={"query":"mutation C($file:Upload!,$fileName:String!){convertDocument(file:$file,fileName:$fileName){id status startedAt}}","variables":{"file":null,"fileName":"report.docx"}}'</span> \
+  -F <span class="str">'map={"0":["variables.file"]}'</span> \
+  -F <span class="str">'0=@report.docx'</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">myConversionJobs</span>
+          <span class="op-type query">Query</span>
+          <span class="op-auth auth-yes">Auth required</span>
+          <span class="op-desc-short">List your conversion jobs, newest first</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div style="font-size:0.8rem;color:#94a3b8">None</div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">[ConversionJob!]!</div>
+              <div style="margin-top:0.4rem;font-size:0.8rem;color:#64748b">Sorted by <code>startedAt</code> descending. Only jobs owned by the authenticated user.</div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="kw">query</span> <span class="fn">MyJobs</span> {
+  myConversionJobs {
+    id
+    fileName
+    fileType
+    fileSizeBytes
+    status
+    startedAt
+    completedAt
+    downloadUrl
+    error
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">allConversionJobs</span>
+          <span class="op-type query">Query</span>
+          <span class="op-auth auth-yes">Auth required</span>
+          <span class="op-desc-short">List all jobs across all users, newest first</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div style="font-size:0.8rem;color:#94a3b8">None</div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">[ConversionJob!]!</div>
+              <div style="margin-top:0.4rem;font-size:0.8rem;color:#64748b">Includes <code>userName</code> and <code>userEmail</code> for auditing.</div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="kw">query</span> <span class="fn">AllJobs</span> {
+  allConversionJobs {
+    id
+    userName
+    userEmail
+    fileName
+    status
+    startedAt
+    completedAt
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">conversionJob</span>
+          <span class="op-type query">Query</span>
+          <span class="op-auth auth-yes">Auth required</span>
+          <span class="op-desc-short">Fetch a single job by ID (owner only)</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div class="arg-row"><span class="arg-name">id</span><span class="arg-type">ID!</span></div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">ConversionJob</div>
+              <div style="margin-top:0.4rem;font-size:0.8rem;color:#64748b">Returns <code>null</code> if not found. Returns <code>FORBIDDEN</code> error if job belongs to another user.</div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="kw">query</span> <span class="fn">GetJob</span>(<span class="fn">$id</span>: ID!) {
+  conversionJob(id: <span class="fn">$id</span>) {
+    id
+    status
+    downloadUrl
+    error
+    completedAt
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">cancelConversionJob</span>
+          <span class="op-type mutation">Mutation</span>
+          <span class="op-auth auth-yes">Auth required</span>
+          <span class="op-desc-short">Cancel a PENDING or PROCESSING job</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div class="arg-row"><span class="arg-name">id</span><span class="arg-type">ID!</span></div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">ConversionJob!</div>
+              <div style="margin-top:0.4rem;font-size:0.8rem;color:#64748b">
+                Job is updated to <code>status: FAILED</code> with <code>error: "Cancelled by user"</code>.<br/>
+                Throws if job is already COMPLETED or FAILED.
+              </div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="kw">mutation</span> <span class="fn">Cancel</span>(<span class="fn">$id</span>: ID!) {
+  cancelConversionJob(id: <span class="fn">$id</span>) {
+    id
+    status
+    error
+    completedAt
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">reprocessConversionJob</span>
+          <span class="op-type mutation">Mutation</span>
+          <span class="op-auth auth-yes">Auth required</span>
+          <span class="op-desc-short">Retry a FAILED job using the original uploaded file</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div class="arg-row"><span class="arg-name">id</span><span class="arg-type">ID!</span></div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">ConversionJob!</div>
+              <div style="margin-top:0.4rem;font-size:0.8rem;color:#64748b">
+                Resets job to <code>PENDING</code>, re-runs Gotenberg conversion.<br/>
+                Throws if status is not <code>FAILED</code>, or if original file was deleted.
+              </div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="kw">mutation</span> <span class="fn">Reprocess</span>(<span class="fn">$id</span>: ID!) {
+  reprocessConversionJob(id: <span class="fn">$id</span>) {
+    id
+    status
+    startedAt
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-item">
+        <button class="op-trigger" onclick="toggle(this)">
+          <span class="op-name">deleteConversionJob</span>
+          <span class="op-type mutation">Mutation</span>
+          <span class="op-auth auth-yes">Auth required</span>
+          <span class="op-desc-short">Permanently remove a job record</span>
+          <span class="op-chevron">▼</span>
+        </button>
+        <div class="op-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Arguments</h4>
+              <div class="arg-row"><span class="arg-name">id</span><span class="arg-type">ID!</span></div>
+            </div>
+            <div class="detail-section">
+              <h4>Returns</h4>
+              <div class="returns">Boolean!</div>
+              <div style="margin-top:0.4rem;font-size:0.8rem;color:#64748b">Returns <code>true</code> on success. Only the job owner can delete.</div>
+            </div>
+          </div>
+          <div class="example-block">
+            <h4>Example</h4>
+            <button class="copy-btn" onclick="copy(this)">copy</button>
+            <pre><span class="kw">mutation</span> <span class="fn">Delete</span>(<span class="fn">$id</span>: ID!) {
+  deleteConversionJob(id: <span class="fn">$id</span>)
+}</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <!-- Types -->
@@ -314,6 +717,18 @@ app.get('/', (_req, res) => {
 
   <div class="footer">© Veritext Legal Solutions &nbsp;·&nbsp; Veritext Convert API</div>
 </div>
+<script>
+  function toggle(btn) {
+    btn.closest('.op-item').classList.toggle('open');
+  }
+  function copy(btn) {
+    const pre = btn.nextElementSibling;
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = 'copy', 1500);
+    });
+  }
+</script>
 </body>
 </html>`)
 })
