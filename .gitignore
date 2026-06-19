@@ -6,3 +6,5 @@ dist
 *.pdf
 uploads/
 .turbo
+.terraform/
+.terraform.lock.hcl
