@@ -1,62 +1,63 @@
 import { GraphQLError } from 'graphql'
 import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
-import fs from 'fs/promises'
-import { fileURLToPath } from 'url'
-import { db } from '../db/index.js'
+import { getUserById, getJobById, getJobsByUser, getAllJobs, putJob, updateJob, deleteJobRecord } from '../db/index.js'
+import { uploadToS3, downloadFromS3, deleteFromS3, getPresignedUrl, originalKey, pdfKey } from '../services/storage.js'
 import { convertToPdf, SUPPORTED_TYPES } from '../services/conversion.js'
 import type { Context } from '../context.js'
 import type { FileUpload } from 'graphql-upload-ts'
+import type { ConversionJob } from '@veritext-render/shared'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const uploadsBase = path.join(__dirname, '../../uploads')
+async function withDownloadUrl(job: ConversionJob & { s3PdfKey?: string }): Promise<ConversionJob> {
+  if (job.status === 'COMPLETED' && job.s3PdfKey) {
+    const downloadUrl = await getPresignedUrl(job.s3PdfKey)
+    return { ...job, downloadUrl }
+  }
+  return job
+}
 
-async function ensureDir(p: string) {
-  await fs.mkdir(p, { recursive: true })
+async function withDownloadUrls(jobs: (ConversionJob & { s3PdfKey?: string })[]): Promise<ConversionJob[]> {
+  return Promise.all(jobs.map(withDownloadUrl))
 }
 
 export const jobResolvers = {
   Query: {
     me: async (_: unknown, __: unknown, ctx: Context) => {
       if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
-      await db.read()
-      const user = db.data.users.find(u => u.id === ctx.user!.id)
+      const user = await getUserById(ctx.user.id)
       if (!user) throw new GraphQLError('User not found')
       return { id: user.id, name: user.name, email: user.email, createdAt: user.createdAt }
     },
     conversionJob: async (_: unknown, { id }: { id: string }, ctx: Context) => {
       if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
-      await db.read()
-      const job = db.data.jobs.find(j => j.id === id)
+      const job = await getJobById(id)
       if (!job) return null
       if (job.userId !== ctx.user.id) throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } })
-      return job
+      return withDownloadUrl(job as ConversionJob & { s3PdfKey?: string })
     },
     myConversionJobs: async (_: unknown, __: unknown, ctx: Context) => {
       if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
-      await db.read()
-      return db.data.jobs
-        .filter(j => j.userId === ctx.user!.id)
-        .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+      const jobs = await getJobsByUser(ctx.user.id)
+      return withDownloadUrls(jobs as (ConversionJob & { s3PdfKey?: string })[])
     },
     allConversionJobs: async (_: unknown, __: unknown, ctx: Context) => {
       if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
-      await db.read()
-      return db.data.jobs.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+      const jobs = await getAllJobs()
+      return withDownloadUrls(jobs as (ConversionJob & { s3PdfKey?: string })[])
     },
   },
+
   Mutation: {
     convertDocument: async (_: unknown, { file, fileName }: { file: Promise<FileUpload>; fileName: string }, ctx: Context) => {
       if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
 
-      const { createReadStream, mimetype, filename } = await file
+      const { createReadStream, filename } = await file
       const ext = path.extname(fileName || filename).toLowerCase()
 
       if (!SUPPORTED_TYPES.includes(ext)) {
         throw new GraphQLError(`Unsupported file type: ${ext}`, { extensions: { code: 'BAD_USER_INPUT' } })
       }
 
-      // Read stream to buffer
       const stream = createReadStream()
       const chunks: Buffer[] = []
       for await (const chunk of stream) {
@@ -66,157 +67,90 @@ export const jobResolvers = {
 
       const jobId = uuidv4()
       const originalFileName = fileName || filename
-      const fileSizeBytes = inputBuffer.length
 
-      // Save original
-      await ensureDir(path.join(uploadsBase, 'originals'))
-      await fs.writeFile(path.join(uploadsBase, 'originals', `${jobId}${ext}`), inputBuffer)
+      await uploadToS3(inputBuffer, originalKey(jobId, ext), 'application/octet-stream')
 
-      // Create job record
-      const job = {
+      const job: ConversionJob = {
         id: jobId,
         userId: ctx.user.id,
         userName: ctx.user.name,
         userEmail: ctx.user.email,
         fileName: originalFileName,
         fileType: ext,
-        fileSizeBytes,
-        status: 'PENDING' as const,
+        fileSizeBytes: inputBuffer.length,
+        status: 'PENDING',
         startedAt: new Date().toISOString(),
       }
+      await putJob(job)
 
-      await db.read()
-      db.data.jobs.push(job)
-      await db.write()
-
-      // Async conversion (do not await)
+      // Async conversion
       ;(async () => {
         try {
-          await db.read()
-          const idx = db.data.jobs.findIndex(j => j.id === jobId)
-          if (idx === -1) return
-          db.data.jobs[idx] = { ...db.data.jobs[idx], status: 'PROCESSING' }
-          await db.write()
-
+          await updateJob(jobId, { status: 'PROCESSING' })
           const pdfBuffer = await convertToPdf(inputBuffer, originalFileName)
-
-          await ensureDir(path.join(uploadsBase, 'pdfs'))
-          await fs.writeFile(path.join(uploadsBase, 'pdfs', `${jobId}.pdf`), pdfBuffer)
-
-          const downloadUrl = `http://localhost:4000/files/pdfs/${jobId}.pdf`
-          await db.read()
-          const idx2 = db.data.jobs.findIndex(j => j.id === jobId)
-          if (idx2 === -1) return
-          db.data.jobs[idx2] = {
-            ...db.data.jobs[idx2],
-            status: 'COMPLETED',
-            completedAt: new Date().toISOString(),
-            downloadUrl,
-          }
-          await db.write()
+          const key = pdfKey(jobId)
+          await uploadToS3(pdfBuffer, key, 'application/pdf')
+          await updateJob(jobId, { status: 'COMPLETED', completedAt: new Date().toISOString(), s3PdfKey: key } as Partial<ConversionJob & { s3PdfKey: string }>)
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err)
-          await db.read()
-          const idx = db.data.jobs.findIndex(j => j.id === jobId)
-          if (idx !== -1) {
-            db.data.jobs[idx] = {
-              ...db.data.jobs[idx],
-              status: 'FAILED',
-              completedAt: new Date().toISOString(),
-              error: msg,
-            }
-            await db.write()
-          }
+          await updateJob(jobId, { status: 'FAILED', completedAt: new Date().toISOString(), error: msg })
         }
       })()
 
       return job
     },
+
     deleteConversionJob: async (_: unknown, { id }: { id: string }, ctx: Context) => {
       if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
-      await db.read()
-      const idx = db.data.jobs.findIndex(j => j.id === id)
-      if (idx === -1) throw new GraphQLError('Job not found')
-      if (db.data.jobs[idx].userId !== ctx.user.id) throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } })
-      db.data.jobs.splice(idx, 1)
-      await db.write()
+      const job = await getJobById(id)
+      if (!job) throw new GraphQLError('Job not found')
+      if (job.userId !== ctx.user.id) throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } })
+      const j = job as ConversionJob & { s3PdfKey?: string }
+      await Promise.allSettled([
+        deleteFromS3(originalKey(job.id, job.fileType)),
+        j.s3PdfKey ? deleteFromS3(j.s3PdfKey) : Promise.resolve(),
+      ])
+      await deleteJobRecord(id)
       return true
     },
 
     cancelConversionJob: async (_: unknown, { id }: { id: string }, ctx: Context) => {
       if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
-      await db.read()
-      const idx = db.data.jobs.findIndex(j => j.id === id)
-      if (idx === -1) throw new GraphQLError('Job not found')
-      if (db.data.jobs[idx].userId !== ctx.user.id) throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } })
-      const job = db.data.jobs[idx]
+      const job = await getJobById(id)
+      if (!job) throw new GraphQLError('Job not found')
+      if (job.userId !== ctx.user.id) throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } })
       if (job.status !== 'PENDING' && job.status !== 'PROCESSING') {
         throw new GraphQLError('Only PENDING or PROCESSING jobs can be cancelled')
       }
-      db.data.jobs[idx] = {
-        ...job,
-        status: 'FAILED',
-        completedAt: new Date().toISOString(),
-        error: 'Cancelled by user',
-      }
-      await db.write()
-      return db.data.jobs[idx]
+      await updateJob(id, { status: 'FAILED', completedAt: new Date().toISOString(), error: 'Cancelled by user' })
+      return { ...job, status: 'FAILED', completedAt: new Date().toISOString(), error: 'Cancelled by user' }
     },
 
     reprocessConversionJob: async (_: unknown, { id }: { id: string }, ctx: Context) => {
       if (!ctx.user) throw new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })
-      await db.read()
-      const idx = db.data.jobs.findIndex(j => j.id === id)
-      if (idx === -1) throw new GraphQLError('Job not found')
-      if (db.data.jobs[idx].userId !== ctx.user.id) throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } })
-      const job = db.data.jobs[idx]
+      const job = await getJobById(id)
+      if (!job) throw new GraphQLError('Job not found')
+      if (job.userId !== ctx.user.id) throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } })
       if (job.status !== 'FAILED') throw new GraphQLError('Only FAILED jobs can be reprocessed')
 
-      const originalPath = path.join(uploadsBase, 'originals', `${job.id}${job.fileType}`)
-      const inputBuffer = await fs.readFile(originalPath).catch(() => {
-        throw new GraphQLError('Original file not found — please upload again')
+      const inputBuffer = await downloadFromS3(originalKey(job.id, job.fileType)).catch(() => {
+        throw new GraphQLError('Original file not found in storage — please upload again')
       })
 
-      db.data.jobs[idx] = {
-        ...job,
-        status: 'PENDING',
-        startedAt: new Date().toISOString(),
-        completedAt: undefined,
-        downloadUrl: undefined,
-        error: undefined,
-      }
-      await db.write()
-      const updatedJob = db.data.jobs[idx]
+      const resetFields = { status: 'PENDING' as const, startedAt: new Date().toISOString(), completedAt: undefined, downloadUrl: undefined, error: undefined }
+      await updateJob(id, resetFields)
+      const updatedJob = { ...job, ...resetFields }
 
-      // Re-run async conversion
-      const jobId = job.id
-      const originalFileName = job.fileName
       ;(async () => {
         try {
-          await db.read()
-          const i = db.data.jobs.findIndex(j => j.id === jobId)
-          if (i === -1) return
-          db.data.jobs[i] = { ...db.data.jobs[i], status: 'PROCESSING' }
-          await db.write()
-
-          const pdfBuffer = await convertToPdf(inputBuffer, originalFileName)
-          await ensureDir(path.join(uploadsBase, 'pdfs'))
-          await fs.writeFile(path.join(uploadsBase, 'pdfs', `${jobId}.pdf`), pdfBuffer)
-
-          const downloadUrl = `http://localhost:4000/files/pdfs/${jobId}.pdf`
-          await db.read()
-          const i2 = db.data.jobs.findIndex(j => j.id === jobId)
-          if (i2 === -1) return
-          db.data.jobs[i2] = { ...db.data.jobs[i2], status: 'COMPLETED', completedAt: new Date().toISOString(), downloadUrl }
-          await db.write()
+          await updateJob(id, { status: 'PROCESSING' })
+          const pdfBuffer = await convertToPdf(inputBuffer, job.fileName)
+          const key = pdfKey(job.id)
+          await uploadToS3(pdfBuffer, key, 'application/pdf')
+          await updateJob(id, { status: 'COMPLETED', completedAt: new Date().toISOString(), s3PdfKey: key } as Partial<ConversionJob & { s3PdfKey: string }>)
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err)
-          await db.read()
-          const i = db.data.jobs.findIndex(j => j.id === jobId)
-          if (i !== -1) {
-            db.data.jobs[i] = { ...db.data.jobs[i], status: 'FAILED', completedAt: new Date().toISOString(), error: msg }
-            await db.write()
-          }
+          await updateJob(id, { status: 'FAILED', completedAt: new Date().toISOString(), error: msg })
         }
       })()
 

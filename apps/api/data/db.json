@@ -54,6 +54,19 @@
       "startedAt": "2026-06-18T18:16:38.546Z",
       "completedAt": "2026-06-18T18:16:45.141Z",
       "downloadUrl": "http://localhost:4000/files/pdfs/78e5eec3-6a85-4eb2-b952-8ce603560788.pdf"
+    },
+    {
+      "id": "d53f17b1-d344-4855-bdb2-89b6a5038114",
+      "userId": "user-1",
+      "userName": "Mike Coen",
+      "userEmail": "mcoen@veritext.com",
+      "fileName": "Vault_ES_Redesign.docx",
+      "fileType": ".docx",
+      "fileSizeBytes": 82771,
+      "status": "COMPLETED",
+      "startedAt": "2026-06-18T19:51:53.877Z",
+      "completedAt": "2026-06-18T19:51:58.435Z",
+      "downloadUrl": "http://localhost:4000/files/pdfs/d53f17b1-d344-4855-bdb2-89b6a5038114.pdf"
     }
   ]
 }

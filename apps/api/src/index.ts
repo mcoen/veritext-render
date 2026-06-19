@@ -7,12 +7,6 @@ import bodyParser from 'body-parser'
 import { typeDefs } from './schema/typeDefs.js'
 import { resolvers } from './resolvers/index.js'
 import { createContext } from './context.js'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import fs from 'fs'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
 const app = express()
 app.use(cors({
   origin: '*',
@@ -20,11 +14,6 @@ app.use(cors({
 }))
 app.use(bodyParser.json())
 app.use('/graphql', graphqlUploadExpress({ maxFileSize: 100_000_000, maxFiles: 1 }))
-
-// Serve converted PDF files
-const uploadsDir = path.join(__dirname, '../uploads')
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true })
-app.use('/files', express.static(uploadsDir))
 
 const server = new ApolloServer({ typeDefs, resolvers })
 await server.start()
@@ -254,8 +243,8 @@ app.get('/', (_req, res) => {
     <div class="endpoint-row">
       <span class="method get">GET</span>
       <div class="endpoint-info">
-        <div class="endpoint-path">/files/pdfs/{jobId}.pdf</div>
-        <div class="endpoint-desc">Download a converted PDF by job ID</div>
+        <div class="endpoint-path">S3 presigned URL (in <code style="font-size:0.8em">downloadUrl</code>)</div>
+        <div class="endpoint-desc">Converted PDFs are served directly from S3 via a time-limited presigned URL returned with each job</div>
       </div>
     </div>
     <div class="endpoint-row">

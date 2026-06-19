@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
-import { db } from '../db/index.js'
+import { getUserByEmail, putUser } from '../db/index.js'
 import { GraphQLError } from 'graphql'
 import type { Context } from '../context.js'
 
@@ -16,18 +16,15 @@ function makeToken(user: { id: string; name: string; email: string }) {
 export const authResolvers = {
   Mutation: {
     register: async (_: unknown, { name, email, password }: { name: string; email: string; password: string }, _ctx: Context) => {
-      await db.read()
-      const existing = db.data.users.find(u => u.email === email)
+      const existing = await getUserByEmail(email)
       if (existing) throw new GraphQLError('Email already registered', { extensions: { code: 'BAD_USER_INPUT' } })
       const passwordHash = await bcrypt.hash(password, 10)
       const user = { id: uuidv4(), name, email, passwordHash, createdAt: new Date().toISOString() }
-      db.data.users.push(user)
-      await db.write()
+      await putUser(user)
       return makeToken(user)
     },
     login: async (_: unknown, { email, password }: { email: string; password: string }, _ctx: Context) => {
-      await db.read()
-      const user = db.data.users.find(u => u.email === email)
+      const user = await getUserByEmail(email)
       if (!user) throw new GraphQLError('Invalid credentials', { extensions: { code: 'UNAUTHENTICATED' } })
       const valid = await bcrypt.compare(password, user.passwordHash)
       if (!valid) throw new GraphQLError('Invalid credentials', { extensions: { code: 'UNAUTHENTICATED' } })
