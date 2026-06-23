@@ -90,12 +90,11 @@ function makeApolloClient(token: string | null) {
 
 function ApolloWrapper({ children }: { children: React.ReactNode }) {
   const { token } = useAuth()
-  const [client] = useState(() => makeApolloClient(token))
+  const [client, setClient] = useState(() => makeApolloClient(token))
 
   useEffect(() => {
-    // Reset store on auth change
-    client.resetStore().catch(() => {})
-  }, [token, client])
+    setClient(makeApolloClient(token))
+  }, [token])
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>
 }

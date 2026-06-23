@@ -77,7 +77,7 @@ export default function ConversionsPage() {
       if (json.errors) {
         setUploadError(json.errors[0]?.message ?? 'Upload failed')
       } else {
-        await refetch()
+        refetch().catch(() => {})
       }
     } catch {
       setUploadError('Network error. Is the API running?')
